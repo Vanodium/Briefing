@@ -201,10 +201,13 @@ struct DashboardView: View {
     }
 
     /// The weekday, rising out of a mask as if from behind a line. Once the day opens,
-    /// the block glides up and the word is cropped by the top edge of the screen.
+    /// the block glides up and the top edge of the screen takes a third off the capitals:
+    /// a crop deep enough to read as chosen, not as type that did not quite fit.
     private func dayWord(_ date: Date, _ g: DashGrid) -> some View {
         let size = 300 * g.s
         let maskHeight = 262 * g.s
+        let baseline = 231 * g.s
+        let top = Theme.nsFont(size).capHeight * 2 / 3 - baseline
         return ZStack(alignment: .topLeading) {
             Color.clear
             Text(Fmt.string(date, "EEEE").uppercased(with: Theme.locale))
@@ -212,7 +215,7 @@ struct DashboardView: View {
                 .tracking(-10 * g.s)
                 .foregroundStyle(Theme.ink)
                 .fixedSize()
-                .offset(y: 231 * g.s - Theme.ascent(size))
+                .offset(y: baseline - Theme.ascent(size))
                 .offset(y: shown ? 0 : maskHeight)
                 .animation(Curves.settle(1.9).delay(0.15), value: shown)
                 .opacity(shown ? 1 : 0)
@@ -220,7 +223,7 @@ struct DashboardView: View {
         }
         .frame(width: g.w - g.marginL + 4 * g.s, height: maskHeight, alignment: .topLeading)
         .clipped()
-        .offset(x: g.marginL - 4 * g.s, y: -58 * g.s)
+        .offset(x: g.marginL - 4 * g.s, y: top)
         .accessibilityHidden(true)
     }
 
