@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleDisplayName</key>
+	<string>Briefing</string>
+	<key>CFBundleExecutable</key>
+	<string>Briefing</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
+	<key>CFBundleIdentifier</key>
+	<string>io.github.vanodium.briefing</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+	</array>
+	<key>CFBundleName</key>
+	<string>Briefing</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>GoogleClientID</key>
+	<string></string>
+	<key>GoogleClientSecret</key>
+	<string></string>
+	<key>LSMinimumSystemVersion</key>
+	<string>14.0</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>To show the plan for the day from Calendar.</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>To show the plan for the day from Calendar.</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>© 2026 Vanodium. MIT License.</string>
+	<key>NSRemindersFullAccessUsageDescription</key>
+	<string>To show today's reminders.</string>
+	<key>NSRemindersUsageDescription</key>
+	<string>To show today's reminders.</string>
+	<key>SUFeedURL</key>
+	<string>https://github.com/Vanodium/Briefing/releases/latest/download/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>9JVBtj/Cn4/Sb0zWarKplcAPoXuf625Ro0vqS/MOSUw=</string>
+</dict>
+</plist>

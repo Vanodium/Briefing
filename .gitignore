@@ -1,0 +1,7 @@
+.build/
+build/
+.backup-*/
+.DS_Store
+*.dmg
+*.zip
+dist/
