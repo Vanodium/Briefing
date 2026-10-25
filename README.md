@@ -1,154 +1,351 @@
-# Briefing
+<p align="center">
+  <img src="assets/readme/icon.png" width="112" alt="Briefing icon">
+</p>
 
-**A morning ritual for macOS.** Every day, on the first wake of your Mac after a time you choose, Briefing fills the screen with your day: the weekday, the time, the weather, the principles you live by, today's calendar and this month's challenge. Read it, press Enter, begin.
+<h1 align="center">Briefing</h1>
 
-No accounts, no tracking, no feeds. Your calendar never leaves your Mac.
+<p align="center">
+  <b>Open your Mac in the morning. Your whole day is already on the screen.</b>
+</p>
 
-Briefing is free. If it makes your mornings better, you can [support it on Ko-fi](https://ko-fi.com/vanodium).
+<p align="center">
+  <a href="https://github.com/Vanodium/Briefing/releases/latest">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="assets/readme/download-dark.png">
+      <img src="assets/readme/download-light.png" width="260" alt="Download for macOS">
+    </picture>
+  </a>
+</p>
 
-## Download
+<p align="center">
+  <sub>Free&nbsp;&nbsp;·&nbsp;&nbsp;macOS 14+&nbsp;&nbsp;·&nbsp;&nbsp;Apple silicon & Intel&nbsp;&nbsp;·&nbsp;&nbsp;No account, no tracking</sub>
+</p>
 
-Get the latest `Briefing-X.Y.Z.dmg` from [Releases](https://github.com/Vanodium/Briefing/releases/latest), open it and drag Briefing into Applications.
+<p align="center">
+  <a href="#how-it-works">How it works</a>&nbsp;&nbsp;·&nbsp;&nbsp;
+  <a href="#ten-kinds-of-morning-light">Themes</a>&nbsp;&nbsp;·&nbsp;&nbsp;
+  <a href="#install">Install</a>&nbsp;&nbsp;·&nbsp;&nbsp;
+  <a href="#privacy">Privacy</a>&nbsp;&nbsp;·&nbsp;&nbsp;
+  <a href="#faq">FAQ</a>
+</p>
 
-Requires **macOS 14 Sonoma or later**, on Apple silicon or Intel.
+<br>
 
-### Opening it the first time
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/readme/hero-dark.webp">
+  <img src="assets/readme/hero-light.webp" width="100%" alt="Briefing: the weekday rises, then the time and weather. Then the day opens: principles, today's plan, this month's challenge.">
+</picture>
 
-Briefing is not notarized by Apple (notarization requires a paid Apple developer account), so macOS will refuse to open it the first time. You only need to allow it once:
+<br>
 
-**macOS 15 Sequoia and later**
-1. Open Briefing. macOS says it cannot verify the app — click **Done**.
-2. Open **System Settings → Privacy & Security** and scroll down to **Security**.
-3. Next to "Briefing was blocked…", click **Open Anyway** and confirm with your password.
+## Everything that matters. Nothing else.
 
-**macOS 14 Sonoma**
-- Control-click Briefing in Applications, choose **Open**, then **Open** again.
+<table>
+  <tr>
+    <td width="33%" valign="top">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="assets/readme/card-principles-dark.webp">
+        <img src="assets/readme/card-principles-light.webp" width="100%" alt="Principles">
+      </picture>
+      <br><b>Your principles</b>
+      <br>The few rules you live by. Read them before anything else.
+    </td>
+    <td width="33%" valign="top">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="assets/readme/card-today-dark.webp">
+        <img src="assets/readme/card-today-light.webp" width="100%" alt="Today">
+      </picture>
+      <br><b>Today</b>
+      <br>Calendar and Reminders. What's next is in bold.
+    </td>
+    <td width="33%" valign="top">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="assets/readme/card-month-dark.webp">
+        <img src="assets/readme/card-month-light.webp" width="100%" alt="This month">
+      </picture>
+      <br><b>This month</b>
+      <br>One challenge for 30 days. You see it every single morning.
+    </td>
+  </tr>
+</table>
 
-**Or, in Terminal** (any version):
+Plus the time, the date and the weather. No feeds, no news, no notifications.
+
+## How it works
+
+**1. Wake your Mac.** Briefing opens by itself — once a day, the first time you sit down after 7:30 (or whenever you choose).
+
+**2. Press Enter.** The day unfolds.
+
+**3. Press Enter again.** It fades away. Go.
+
+That's the whole app. It lives in the menu bar and stays out of your way the rest of the day.
+
+## Ten kinds of morning light
+
+<picture>
+  <img src="assets/readme/themes.webp" width="100%" alt="Ten themes: First Light, Graphite, Cognac, Blue Hour, Smoke, Daybreak, Dawn, Haze, Mist, Gazette">
+</picture>
+
+<details>
+<summary><b>See each one up close</b></summary>
+<br>
+
+**First Light** — Low morning sun through a window. The signature.
+<img src="assets/readme/theme-firstLight.webp" width="100%" alt="First Light">
+
+**Graphite** — Flat graphite. Nothing but the type.
+<img src="assets/readme/theme-graphite.webp" width="100%" alt="Graphite">
+
+**Cognac** — Dark leather, warm bone type.
+<img src="assets/readme/theme-cognac.webp" width="100%" alt="Cognac">
+
+**Blue Hour** — Before first light: deep blue, a glow under the horizon.
+<img src="assets/readme/theme-blueHour.webp" width="100%" alt="Blue Hour">
+
+**Smoke** — A slow drift of smoke. Only light and air.
+<img src="assets/readme/theme-smoke.webp" width="100%" alt="Smoke">
+
+**Daybreak** — First Light on paper: warm sun across a cream page.
+<img src="assets/readme/theme-daybreak.webp" width="100%" alt="Daybreak">
+
+**Dawn** — A pale sky, peach and lilac over the horizon.
+<img src="assets/readme/theme-dawn.webp" width="100%" alt="Dawn">
+
+**Haze** — A rose morning haze settling into peach light.
+<img src="assets/readme/theme-haze.webp" width="100%" alt="Haze">
+
+**Mist** — Pale grey air, slow shadows drifting through it.
+<img src="assets/readme/theme-mist.webp" width="100%" alt="Mist">
+
+**Gazette** — The morning paper. Black type, one red rule.
+<img src="assets/readme/theme-gazette.webp" width="100%" alt="Gazette">
+
+</details>
+
+## Install
+
+**1.** [Download the latest `.dmg`](https://github.com/Vanodium/Briefing/releases/latest) and drag Briefing into Applications.
+
+**2.** Open it. macOS will block it the first time — that's expected. Allow it once:
+
+<details>
+<summary><b>macOS 15 Sequoia or later</b></summary>
+<br>
+
+1. Open Briefing. When macOS says it can't verify the app, click **Done**.
+2. Go to **System Settings → Privacy & Security** and scroll down.
+3. Next to "Briefing was blocked", click **Open Anyway**.
+
+</details>
+
+<details>
+<summary><b>macOS 14 Sonoma</b></summary>
+<br>
+
+Control-click Briefing in Applications → **Open** → **Open**.
+
+</details>
+
+<details>
+<summary><b>Or one line in Terminal</b></summary>
+<br>
+
 ```bash
 xattr -dr com.apple.quarantine /Applications/Briefing.app
 ```
 
-The source is all here: you can read exactly what the app does, or build it yourself (see [Building from source](#building-from-source)) — a copy you build never needs this step.
+</details>
 
-## First launch
+<details>
+<summary>Why is it blocked?</summary>
+<br>
 
-Briefing lives in the menu bar (a small grid icon); there is no Dock icon. On the first launch a short setup walks you through seven steps: a theme, access to Calendar and Reminders, your principles, this month's challenge, and when the dashboard should appear. Return continues, Esc goes back. Run it again any time from the menu → **Show Onboarding…**
+Apple charges a yearly fee to "notarize" apps, and Briefing is a free side project. The code is all here — read it, or [build it yourself](#for-developers) and skip this step entirely.
 
-## The ritual
+</details>
 
-1. **Arrival.** The weekday rises out of a dark screen, then the time, the date and the weather.
-2. **Enter or Space — open the day.** The upper block glides up and the day arrives piece by piece: your principles, today's calendar and reminders, the month's challenge.
-3. **Enter, Space or Esc — sign and begin.** The screen fades away.
-
-For the first 1.5 seconds keys are ignored, so the key you pressed to wake the Mac cannot dismiss it.
-
-The dashboard is an ordinary window: other windows can come in front of it, the menu bar and the Dock stay where they are. Additional displays are dimmed while Briefing is in front.
-
-| Key | Action |
-|---|---|
-| Enter / Space | open the day, then sign & begin |
-| Esc | close · leave edit mode |
-| E | amend principles and challenges |
-| S | settings |
-| ⌃⌥⌘M | show or hide Briefing, from anywhere |
-
-Every key can be changed in **Settings → Shortcuts**.
-
-### Editing
-
-Press **E** on the dashboard. Principles and challenges become text fields; hover a row for Up, Down and Delete; **Add** creates a new one. Changes are saved as you type. On the last day of a month you can set next month's challenges in advance; past months move to an archive file.
-
-## Settings
-
-Menu → **Settings…**, or **S** on the dashboard.
-
-- **General** — open by itself on the first wake of the day, "not before" time, open at login, dim other displays, weather city, updates.
-- **Appearance** — ten themes, five dark and five light: First Light, Graphite, Cognac, Blue Hour, Smoke, Daybreak, Dawn, Haze, Mist, Gazette.
-- **Blocks** — show, hide and reorder Principles, Today and the month challenge; the weather.
-- **Calendars** — which Apple calendars and reminder lists appear. Any account added to your Mac (iCloud, Google, Exchange) shows up here.
-- **Shortcuts** — every key above.
-
-## When it opens
-
-Briefing opens by itself once a day, the first time you sit down at the Mac after the "not before" time (07:30 by default):
-
-- waking, unlocking, logging in or the end of the screensaver trigger a check;
-- it opens only when it has not been shown today, the time has passed, the screen is unlocked and the display is awake;
-- a timer every 30 seconds notices a sleep that macOS forgot to announce;
-- with **Open at that time if the Mac is already awake** on, it also opens right at 07:30 if you are already working.
-
-The menu shows whether it has been shown today; **Reset "Shown Today"** lets you try it again. Every decision is written to the log (menu → **Open Log**).
-
-## Your data
-
-Everything is plain JSON you can edit by hand (menu → **Open Data Folder**):
-
-```
-~/Library/Application Support/Briefing/
-  mindset.json              your principles
-  challenges.json           challenges by month: {"months": {"2026-11": ["Drink more water"]}}
-  challenges-archive.md     past months
-  settings.json             everything in Settings
-  state.json                when it was last shown
-  weather-cache.json        the last weather, for when there is no network
-  Fonts/                    optional fonts (see below)
-```
-
-The log is `~/Library/Logs/Briefing.log`.
+**3.** A one-minute setup: theme, calendar access, your principles, this month's challenge, wake time. Done — see you tomorrow morning.
 
 ## Privacy
 
-Briefing has no accounts, no analytics and no servers of its own. It connects to:
+**Your day never leaves your Mac.** No account. No analytics. No servers.
 
-- **Open-Meteo** (`api.open-meteo.com`) — your city's coordinates and time zone, to get the weather, while the dashboard is open.
-- **Apple** — the city name you type, once, to find its coordinates (macOS geocoding).
-- **GitHub** — to check for a new version, only if you allow automatic update checks (or choose Check for Updates). No profile of your Mac is sent.
+<details>
+<summary>What does it connect to, exactly?</summary>
+<br>
 
-Your calendar events, reminders, principles and challenges are read and stored only on your Mac.
+- **Open-Meteo** — your city's coordinates, for the weather.
+- **Apple** — the city name you type, once, to find it on the map.
+- **GitHub** — to check for updates, only if you allow it.
 
-## Updates
+Calendar events, reminders, principles and challenges are read and stored only on your Mac.
 
-Briefing updates itself from this repository's releases through [Sparkle](https://sparkle-project.org). On the second launch it asks whether to check automatically; you can change that in **Settings → General** or check by hand from the menu. Every update is signed, and installed copies refuse anything that is not.
+</details>
 
-## Typeface
+## FAQ
 
-The dashboard is set in **Neue Haas Grotesk Display** if it is installed, otherwise in **Helvetica Neue**, which ships with every Mac. If you own Neue Haas Grotesk Display Pro, install it normally or put the `.otf` files into `~/Library/Application Support/Briefing/Fonts/` and restart Briefing.
+<details>
+<summary><b>Will it pop up every time I open my laptop?</b></summary>
+<br>
 
-## Troubleshooting
+No. Once a day — the first time you wake, unlock or log in after your chosen time. Missed it? Press <kbd>⌃</kbd><kbd>⌥</kbd><kbd>⌘</kbd><kbd>M</kbd> anywhere to bring it back.
 
-- **"No access to your calendar."** Settings → Calendars → **Allow Access**, or System Settings → Privacy & Security → Calendars / Reminders → Briefing.
-- **It did not open this morning.** Open the log: lines starting with `waiting:` say what it was waiting for.
-- **Uninstall.** Quit Briefing from the menu, turn it off in System Settings → General → Login Items, and move it to the Trash. Your data stays in `~/Library/Application Support/Briefing/`; delete that folder to remove it too.
+</details>
 
-## Building from source
+<details>
+<summary><b>Does it work with Google or Outlook calendar?</b></summary>
+<br>
 
-Needs macOS 14 and Swift — Xcode, or just the Command Line Tools (`xcode-select --install`).
+Yes. Add the account in **System Settings → Internet Accounts** and it shows up in Briefing, like any calendar in the Apple Calendar app. Pick which calendars appear in **Settings → Calendars**.
+
+</details>
+
+<details>
+<summary><b>How do I change my principles or challenge?</b></summary>
+<br>
+
+Press <kbd>E</kbd> on the dashboard. Everything turns into text you can edit. Saved as you type. On the last day of the month, you can set next month's challenge in advance.
+
+</details>
+
+<details>
+<summary><b>Keyboard shortcuts?</b></summary>
+<br>
+
+| Key | Does |
+|---|---|
+| <kbd>Enter</kbd> or <kbd>Space</kbd> | open the day, then close it |
+| <kbd>Esc</kbd> | close · stop editing |
+| <kbd>E</kbd> | edit principles and challenges |
+| <kbd>S</kbd> | settings |
+| <kbd>⌃</kbd><kbd>⌥</kbd><kbd>⌘</kbd><kbd>M</kbd> | show or hide Briefing from anywhere |
+
+All of them can be changed in **Settings → Shortcuts**.
+
+</details>
+
+<details>
+<summary><b>What can I customize?</b></summary>
+<br>
+
+The time it appears, the theme, the weather city, which blocks are shown and in what order, which calendars and reminder lists appear, and every shortcut. Menu bar icon → **Settings…**, or press <kbd>S</kbd>.
+
+</details>
+
+<details>
+<summary><b>I have more than one display.</b></summary>
+<br>
+
+Briefing fills one screen and dims the rest. You can turn the dimming off in Settings.
+
+</details>
+
+<details>
+<summary><b>It didn't open this morning.</b></summary>
+<br>
+
+Menu bar icon → **Open Log**. Lines starting with `waiting:` tell you what it was waiting for. **Reset "Shown Today"** in the same menu lets you try again.
+
+No calendar? **Settings → Calendars → Allow Access**, or System Settings → Privacy & Security → Calendars.
+
+</details>
+
+<details>
+<summary><b>Where is my data?</b></summary>
+<br>
+
+Plain JSON files you can edit by hand. Menu bar icon → **Open Data Folder**.
+
+```
+~/Library/Application Support/Briefing/
+  mindset.json            your principles
+  challenges.json         challenges by month
+  challenges-archive.md   past months
+  settings.json           everything in Settings
+```
+
+</details>
+
+<details>
+<summary><b>How does it update?</b></summary>
+<br>
+
+It checks this repository for new versions through [Sparkle](https://sparkle-project.org), if you allow it. Every update is signed; anything unsigned is refused.
+
+</details>
+
+<details>
+<summary><b>What's the typeface?</b></summary>
+<br>
+
+Helvetica Neue, which every Mac has. If you own **Neue Haas Grotesk Display**, Briefing uses it instead — install it normally, or drop the `.otf` files into `~/Library/Application Support/Briefing/Fonts/`.
+
+</details>
+
+<details>
+<summary><b>How do I uninstall it?</b></summary>
+<br>
+
+Quit it from the menu bar, remove it from **System Settings → General → Login Items**, move it to the Trash. Your data stays in `~/Library/Application Support/Briefing/` — delete that folder too if you want it gone.
+
+</details>
+
+## Like it?
+
+Briefing is free. If it makes your mornings better, you can buy me a coffee.
+
+<a href="https://ko-fi.com/vanodium"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Support on Ko-fi"></a>
+
+<br>
+
+## For developers
+
+<details>
+<summary><b>Build from source</b></summary>
+<br>
+
+Needs macOS 14 and Swift (Xcode, or just `xcode-select --install`).
 
 ```bash
 git clone https://github.com/Vanodium/Briefing.git
 cd Briefing
-./install.sh      # builds, installs into ~/Applications and launches
-./uninstall.sh    # removes the app and its login item; your data is kept
+./install.sh      # build, install into ~/Applications, launch
+./uninstall.sh    # remove the app and its login item; your data stays
 ```
 
-`./build.sh` alone builds `build/Briefing.app` with a local signature. The first build downloads Sparkle and can take a few minutes.
+`./build.sh` alone builds `build/Briefing.app`. The first build downloads Sparkle and takes a few minutes. A copy you build yourself never hits the "can't verify" warning.
 
-### Releasing
+</details>
 
-Once per Mac, `tools/setup-signing.sh` creates the release certificate and Sparkle's update key, and backs both up to `~/Documents/Briefing-signing/`. Keep that backup safe: every future version must be signed with the same keys, or installed copies lose Calendar access and stop updating.
+<details>
+<summary><b>Release a new version</b></summary>
+<br>
+
+Once per Mac, `tools/setup-signing.sh` creates the release certificate and Sparkle's update key and backs them up to `~/Documents/Briefing-signing/`. Keep that backup safe: every future version must be signed with the same keys, or installed copies lose Calendar access and stop updating.
 
 ```bash
-./release.sh 1.0.1    # builds dist/Briefing-1.0.1.dmg, the update archive and appcast.xml
+./release.sh 1.0.1    # → dist/Briefing-1.0.1.dmg, the update archive and appcast.xml
 ```
 
-Then commit the version bump and attach the three files to a GitHub release tagged `v1.0.1`; the script prints the command.
+Commit the version bump and attach the three files to a GitHub release tagged `v1.0.1` — the script prints the command.
 
-## Credits
+</details>
 
-- Weather data by [Open-Meteo.com](https://open-meteo.com/), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
-- Updates by [Sparkle](https://sparkle-project.org), MIT License.
+<details>
+<summary><b>Logs and state</b></summary>
+<br>
 
-## License
+- Log: `~/Library/Logs/Briefing.log` — every open/skip decision is written there.
+- `state.json` — when it was last shown. `weather-cache.json` — the last weather, for offline mornings.
+- Wake detection: wake, unlock, login and screensaver end trigger a check; a 30-second timer catches sleeps macOS forgot to announce.
 
-[MIT](LICENSE) © 2026 Vanodium
+</details>
+
+<br>
+
+<p align="center">
+  <sub>
+    Weather by <a href="https://open-meteo.com/">Open-Meteo</a> (CC BY 4.0) · Updates by <a href="https://sparkle-project.org">Sparkle</a> · <a href="LICENSE">MIT</a> © 2026 Vanodium
+  </sub>
+</p>
