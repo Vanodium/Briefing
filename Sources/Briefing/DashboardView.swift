@@ -167,14 +167,8 @@ struct DashboardView: View {
                 dayWord(date, g)
 
                 HStack(alignment: .firstTextBaseline, spacing: 14 * g.s) {
-                    Text(Fmt.clock(date))
-                        .font(Theme.font(168 * g.s))
-                        .tracking(-6 * g.s)
-                        .monospacedDigit()
+                    RollingClock(text: Fmt.clock(date), size: 168 * g.s, tracking: -6 * g.s)
                         .foregroundStyle(Theme.ink)
-                        // Each minute only the digits that change roll over: the old one lifts away, the new one rises in.
-                        .contentTransition(.numericText(countsDown: false))
-                        .animation(Curves.settle(1.1), value: Fmt.clock(date))
                     // On a 12-hour Mac: AM / PM in small capitals on the clock's baseline.
                     if let period = Fmt.period(date) {
                         Text(period)
@@ -594,6 +588,47 @@ private extension View {
 }
 
 // MARK: - Plan row
+
+/// The big clock. Each minute only the digits that change roll over: the old one lifts away, the new one rises in.
+/// Not `.contentTransition(.numericText)`: its last frame was drawn without the ancestors' offsets,
+/// so the time jumped up over the weekday for a moment whenever a minute turned before the day opened.
+private struct RollingClock: View {
+    let text: String
+    let size: CGFloat
+    let tracking: CGFloat
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 0) {
+            ForEach(Array(text.enumerated()), id: \.offset) { _, char in
+                ZStack {
+                    Text(String(char))
+                        .font(Theme.font(size))
+                        .tracking(tracking)
+                        .monospacedDigit()
+                        .id(char)
+                        .transition(.asymmetric(insertion: roll(from: 0.45), removal: roll(from: -0.45)))
+                }
+            }
+        }
+        .animation(Curves.settle(1.1), value: text)
+    }
+
+    /// Slide in from (or out to) a share of the type size, fading and blurring on the way.
+    private func roll(from share: CGFloat) -> AnyTransition {
+        .modifier(active: Roll(y: share * size, blur: size * 0.04, opacity: 0),
+                  identity: Roll(y: 0, blur: 0, opacity: 1))
+    }
+
+    private struct Roll: ViewModifier {
+        let y: CGFloat
+        let blur: CGFloat
+        let opacity: Double
+
+        func body(content: Content) -> some View {
+            content.offset(y: y).blur(radius: blur).opacity(opacity)
+        }
+    }
+}
 
 private struct AgendaRow: View {
     let item: AgendaItem

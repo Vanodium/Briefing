@@ -75,9 +75,9 @@ Plus the time, the date and the weather. No feeds, no news, no notifications.
 
 **1. Wake your Mac.** Briefing opens by itself — once a day, the first time you sit down after 7:30 (or whenever you choose).
 
-**2. Press Enter.** The day unfolds.
+**2. Read.** The weekday rises, then the time and weather — and the day unfolds by itself: principles, today's plan, this month's challenge.
 
-**3. Press Enter again.** It fades away. Go.
+**3. Press Enter.** It fades away. Go.
 
 That's the whole app. It lives in the menu bar and stays out of your way the rest of the day.
 
@@ -215,7 +215,7 @@ Press <kbd>E</kbd> on the dashboard. Everything turns into text you can edit. Sa
 
 | Key | Does |
 |---|---|
-| <kbd>Enter</kbd> or <kbd>Space</kbd> | open the day, then close it |
+| <kbd>Enter</kbd> or <kbd>Space</kbd> | close · open the day right away, without waiting |
 | <kbd>Esc</kbd> | close · stop editing |
 | <kbd>E</kbd> | edit principles and challenges |
 | <kbd>S</kbd> | settings |
