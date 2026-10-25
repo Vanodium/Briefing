@@ -73,13 +73,13 @@ Plus the time, the date and the weather. No feeds, no news, no notifications.
 
 ## How it works
 
-**1. Wake your Mac.** Briefing opens by itself — once a day, the first time you sit down after 7:30 (or whenever you choose).
+**1. Wake your Mac.** Briefing opens by itself — once a day, the first time you boot after a chosen time.
 
-**2. Read.** The weekday rises, then the time and weather — and the day unfolds by itself: principles, today's plan, this month's challenge.
+**2. Read.** Recall your postulates, today's plan, this month's challenge.
 
 **3. Press Enter.** It fades away. Go.
 
-That's the whole app. It lives in the menu bar and stays out of your way the rest of the day.
+The app lives in the menu bar and stays out of your way the rest of the day.
 
 ## Ten kinds of morning light
 
@@ -197,7 +197,7 @@ No. Once a day — the first time you wake, unlock or log in after your chosen t
 <summary><b>Does it work with Google or Outlook calendar?</b></summary>
 <br>
 
-Yes. Add the account in **System Settings → Internet Accounts** and it shows up in Briefing, like any calendar in the Apple Calendar app. Pick which calendars appear in **Settings → Calendars**.
+Will do soon…
 
 </details>
 
