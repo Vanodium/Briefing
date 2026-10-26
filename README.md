@@ -56,7 +56,7 @@
         <img src="assets/readme/card-today-light.webp" width="100%" alt="Today">
       </picture>
       <br><b>Today</b>
-      <br>Calendar and Reminders. What's next is in bold.
+      <br>Calendar, Reminders, Google Calendar. What's next is in bold.
     </td>
     <td width="33%" valign="top">
       <picture>
@@ -73,9 +73,9 @@ Plus the time, the date and the weather. No feeds, no news, no notifications.
 
 ## How it works
 
-**1. Wake your Mac.** Briefing opens by itself — once a day, the first time you boot after a chosen time.
+**1. Wake your Mac.** Briefing opens by itself — once a day, the first time you wake your Mac after a chosen time. Already at your desk by then? It opens right on time.
 
-**2. Read.** Recall your postulates, today's plan, this month's challenge.
+**2. Read.** The weekday and the time come first, then the day opens: your principles, today's plan, this month's challenge.
 
 **3. Press Enter.** It fades away. Go.
 
@@ -165,7 +165,7 @@ Apple charges a yearly fee to "notarize" apps, and Briefing is a free side proje
 
 </details>
 
-**3.** A one-minute setup: theme, calendar access, your principles, this month's challenge, wake time. Done — see you tomorrow morning.
+**3.** A one-minute setup: theme, your calendars (Apple or Google) and city, your principles, this month's challenge, wake time. Done — see you tomorrow morning.
 
 ## Privacy
 
@@ -190,7 +190,7 @@ Calendar events, reminders, principles and challenges are read and stored only o
 <summary><b>Will it pop up every time I open my laptop?</b></summary>
 <br>
 
-No. Once a day — the first time you wake, unlock or log in after your chosen time. Missed it? Press <kbd>⌃</kbd><kbd>⌥</kbd><kbd>⌘</kbd><kbd>M</kbd> anywhere to bring it back.
+No. Once a day — the first time you wake, unlock or log in after your chosen time, or at that time if the Mac is already awake. Missed it? Press <kbd>⌃</kbd><kbd>⌥</kbd><kbd>⌘</kbd><kbd>M</kbd> anywhere to bring it back.
 
 </details>
 
@@ -232,7 +232,7 @@ All of them can be changed in **Settings → Shortcuts**.
 <summary><b>What can I customize?</b></summary>
 <br>
 
-The time it appears, the theme, the weather city, which blocks are shown and in what order, which calendars and reminder lists appear, and every shortcut. Menu bar icon → **Settings…**, or press <kbd>S</kbd>.
+The time it appears, the theme, the weather city, which blocks are shown and in what order, which calendars and reminder lists appear (Google ones too), whether other displays dim, and every shortcut. Menu bar icon → **Settings…**, or press <kbd>S</kbd>.
 
 </details>
 
@@ -251,6 +251,8 @@ Briefing fills one screen and dims the rest. You can turn the dimming off in Set
 Menu bar icon → **Open Log**. Lines starting with `waiting:` tell you what it was waiting for. **Reset "Shown Today"** in the same menu lets you try again.
 
 No calendar? **Settings → Calendars → Allow Access**, or System Settings → Privacy & Security → Calendars.
+
+No Google events? **Settings → Calendars** shows when they were last updated. If it says access has expired, disconnect and connect the account again.
 
 </details>
 
@@ -290,7 +292,7 @@ Helvetica Neue, which every Mac has. If you own **Neue Haas Grotesk Display**, B
 <summary><b>How do I uninstall it?</b></summary>
 <br>
 
-Quit it from the menu bar, remove it from **System Settings → General → Login Items**, move it to the Trash. Your data stays in `~/Library/Application Support/Briefing/` — delete that folder too if you want it gone.
+If you connected Google, click **Disconnect** in Settings → Calendars first. Then quit it from the menu bar, remove it from **System Settings → General → Login Items**, move it to the Trash. Your data stays in `~/Library/Application Support/Briefing/` — delete that folder too if you want it gone.
 
 </details>
 
@@ -325,9 +327,12 @@ cd Briefing
 <summary><b>Google sign-in</b></summary>
 <br>
 
-Direct sign-in needs an OAuth client of your own. Without them the app builds and runs, and Settings says sign-in is not set up in this build.
+Direct sign-in needs an OAuth client of your own. Without one the app builds and runs, and Settings says sign-in is not set up in this build.
 
-[Google Cloud Console](https://console.cloud.google.com/): enable the Google Calendar API, set up the OAuth consent screen with the `calendar.readonly` scope, then create an OAuth client of type *Desktop app*.
+1. [Create a project](https://console.cloud.google.com/projectcreate) and [enable the Google Calendar API](https://console.cloud.google.com/apis/library/calendar-json.googleapis.com).
+2. [Google Auth Platform](https://console.cloud.google.com/auth/overview): audience *External*, data access `.../auth/calendar.readonly`.
+3. On [Audience](https://console.cloud.google.com/auth/audience), click **Publish app**. While it is in *Testing*, Google ends every sign-in after 7 days. Until Google verifies the app, sign-in shows an "unverified app" warning (**Advanced → Go to Briefing**).
+4. [Create an OAuth client](https://console.cloud.google.com/auth/clients/create) of type *Desktop app*.
 
 Put the ID and secret into `oauth.env` next to `build.sh` (it is git-ignored) or into the environment:
 
@@ -336,7 +341,7 @@ GOOGLE_CLIENT_ID=….apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=…
 ```
 
-`build.sh` writes them into the app's Info.plist.
+`build.sh` writes them into the app's Info.plist — `release.sh` too, so keep `oauth.env` on the Mac you release from.
 
 </details>
 
