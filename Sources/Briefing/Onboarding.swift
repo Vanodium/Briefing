@@ -200,15 +200,19 @@ final class OnboardingModel: ObservableObject {
         }
     }
 
-    var anyAccess: Bool { calendar == .granted || reminders == .granted || googleConnected }
+    var anyAccess: Bool {
+        calendar == .granted || reminders == .granted || CloudProvider.allCases.contains { CloudAccount.shared($0).isConnected }
+    }
 
-    var googleConnected: Bool { GoogleAccount.shared.isConnected }
-    var google: PermissionState { googleConnected ? .granted : .ask }
+    func cloud(_ provider: CloudProvider) -> PermissionState {
+        CloudAccount.shared(provider).isConnected ? .granted : .ask
+    }
 
-    func connectGoogle() {
-        guard !googleConnected else { return }
+    func connect(_ provider: CloudProvider) {
+        let account = CloudAccount.shared(provider)
+        guard !account.isConnected else { return }
         Task { @MainActor in
-            await GoogleAccount.shared.connect()
+            await account.connect()
             NSAppActivate()
             withAnimation(Curves.fade(0.4)) { self.objectWillChange.send() }
         }

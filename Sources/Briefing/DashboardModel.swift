@@ -50,7 +50,7 @@ final class DashboardModel: ObservableObject {
     private var mindsetFile = MindsetFile()
     private let weatherService = WeatherService()
     private var weatherTask: Task<Void, Never>?
-    private var googleTask: Task<Void, Never>?
+    private var cloudTasks: [Task<Void, Never>] = []
     private var agendaReloadWork: DispatchWorkItem?
     private var observers: [NSObjectProtocol] = []
 
@@ -77,7 +77,7 @@ final class DashboardModel: ObservableObject {
         }
         observeChanges()
         reloadAgenda()
-        startGoogleLoop()
+        startCloudLoops()
         startWeatherLoop()
     }
 
@@ -86,8 +86,7 @@ final class DashboardModel: ObservableObject {
         if editing { endEditing() }
         weatherTask?.cancel()
         weatherTask = nil
-        googleTask?.cancel()
-        googleTask = nil
+        stopCloudLoops()
         observers.forEach { NotificationCenter.default.removeObserver($0) }
         observers.removeAll()
     }
@@ -96,7 +95,7 @@ final class DashboardModel: ObservableObject {
     func refreshForNewDay() {
         loadAll()
         reloadAgenda()
-        startGoogleLoop()
+        startCloudLoops()
         startWeatherLoop()
     }
 
@@ -144,17 +143,17 @@ final class DashboardModel: ObservableObject {
             weather = nil
             startWeatherLoop()
         }
+        let cloudChanged = CloudProvider.allCases.contains {
+            new[keyPath: $0.useKey] != old[keyPath: $0.useKey] || new[keyPath: $0.accountKey] != old[keyPath: $0.accountKey]
+        }
         let sourcesChanged = new.useAppleCalendar != old.useAppleCalendar
             || new.useAppleReminders != old.useAppleReminders
-            || new.useGoogleCalendar != old.useGoogleCalendar
-            || new.googleAccount != old.googleAccount
             || new.hiddenCalendars != old.hiddenCalendars
+            || cloudChanged
         if sourcesChanged {
             access = AgendaService.shared.access
             reloadAgenda()
-            if new.useGoogleCalendar != old.useGoogleCalendar || new.googleAccount != old.googleAccount {
-                startGoogleLoop()
-            }
+            if cloudChanged { startCloudLoops() }
         }
         if editing && !canEdit { endEditing() }
     }
@@ -167,11 +166,12 @@ final class DashboardModel: ObservableObject {
     /// Why the Today block has nothing to show, or nil when at least one source can be read.
     var agendaBlocked: String? {
         let s = settings
-        let google = s.useGoogleCalendar && GoogleConfig.isConnected(s)
-        if (s.useAppleCalendar && access.calendar) || (s.useAppleReminders && access.reminders) || google {
+        let cloud = CloudProvider.allCases.contains { $0.isActive(s) }
+        if (s.useAppleCalendar && access.calendar) || (s.useAppleReminders && access.reminders) || cloud {
             return nil
         }
-        if !s.useAppleCalendar && !s.useAppleReminders && !(s.useGoogleCalendar && GoogleConfig.isConfigured) {
+        let cloudChosen = CloudProvider.configured.contains { s[keyPath: $0.useKey] }
+        if !s.useAppleCalendar && !s.useAppleReminders && !cloudChosen {
             return "No calendar chosen."
         }
         return "No access to your calendar."
@@ -209,18 +209,27 @@ final class DashboardModel: ObservableObject {
         }
     }
 
+    private func stopCloudLoops() {
+        cloudTasks.forEach { $0.cancel() }
+        cloudTasks.removeAll()
+    }
+
     /// Google: what was saved last time shows at once; a fresh copy follows once the network is up,
     /// then every quarter of an hour while the screen is open.
-    private func startGoogleLoop() {
-        googleTask?.cancel()
-        googleTask = nil
-        guard settings.useGoogleCalendar, GoogleConfig.isConnected(settings) else { return }
-        googleTask = Task { @MainActor [weak self] in
+    private func startCloudLoops() {
+        stopCloudLoops()
+        for provider in CloudProvider.allCases where provider.isActive(settings) {
+            cloudTasks.append(cloudLoop(CloudCalendarService.shared(provider)))
+        }
+    }
+
+    private func cloudLoop(_ service: CloudCalendarService) -> Task<Void, Never> {
+        Task { @MainActor [weak self] in
             let retries: [UInt64] = [0, 4, 12, 30, 90]
             for delay in retries {
                 if delay > 0 { try? await Task.sleep(nanoseconds: delay * 1_000_000_000) }
                 guard let self, !Task.isCancelled, self.isActive else { return }
-                if await GoogleCalendarService.shared.refresh(day: Date()) {
+                if await service.refresh(day: Date()) {
                     self.reloadAgenda()
                     break
                 }
@@ -228,7 +237,7 @@ final class DashboardModel: ObservableObject {
             while !Task.isCancelled {
                 try? await Task.sleep(nanoseconds: 15 * 60 * 1_000_000_000)
                 guard let self, self.isActive, !Task.isCancelled else { return }
-                if await GoogleCalendarService.shared.refresh(day: Date()) { self.reloadAgenda() }
+                if await service.refresh(day: Date()) { self.reloadAgenda() }
             }
         }
     }

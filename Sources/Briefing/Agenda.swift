@@ -106,11 +106,11 @@ final class AgendaService {
         }
 
         // Google: what was saved at the last fetch, so the morning screen never waits for the network.
-        if settings.useGoogleCalendar && GoogleConfig.isConnected(settings) {
-            let google = GoogleCalendarService.shared.cachedItems(for: day, settings: settings)
+        for provider in CloudProvider.allCases where provider.isActive(settings) {
+            let cloud = CloudCalendarService.shared(provider).cachedItems(for: day, settings: settings)
             // The same account may also be added to macOS — then each event would come twice.
-            let apple = result
-            result.append(contentsOf: google.filter { !Self.isDuplicate($0, in: apple) })
+            let seen = result
+            result.append(contentsOf: cloud.filter { !Self.isDuplicate($0, in: seen) })
         }
 
         return result

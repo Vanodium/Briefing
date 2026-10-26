@@ -33,6 +33,11 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$APP/Contents/Frameworks"
 cp "$BIN" "$APP/Contents/MacOS/Briefing"
 cp Resources/Info.plist "$APP/Contents/Info.plist"
+# Google sign-in (see the README): the OAuth client from the environment or a git-ignored oauth.env.
+[ -f oauth.env ] && source oauth.env
+oauth() { if [ -n "$2" ]; then plutil -replace "$1" -string "$2" "$APP/Contents/Info.plist"; fi; }
+oauth GoogleClientID "${GOOGLE_CLIENT_ID:-}"
+oauth GoogleClientSecret "${GOOGLE_CLIENT_SECRET:-}"
 cp Resources/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 ditto "$FRAMEWORK" "$APP/Contents/Frameworks/Sparkle.framework"
 cp LICENSE "$APP/Contents/Resources/LICENSE.txt"

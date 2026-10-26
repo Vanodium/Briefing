@@ -178,6 +178,7 @@ Apple charges a yearly fee to "notarize" apps, and Briefing is a free side proje
 - **Open-Meteo** — your city's coordinates, for the weather.
 - **Apple** — the city name you type, once, to find it on the map.
 - **GitHub** — to check for updates, only if you allow it.
+- **Google** — your calendars, only if you connect an account.
 
 Calendar events, reminders, principles and challenges are read and stored only on your Mac.
 
@@ -197,7 +198,9 @@ No. Once a day — the first time you wake, unlock or log in after your chosen t
 <summary><b>Does it work with Google or Outlook calendar?</b></summary>
 <br>
 
-Will do soon…
+Google — yes. **Settings → Calendars → Connect Google Account…** — sign in in your browser and the events appear on the dashboard. Access is read-only; the sign-in stays in your Keychain, and the day's events are kept on your Mac so the morning screen never waits for the network.
+
+Outlook — add the account in System Settings → Internet Accounts, and its calendars show up under Apple Calendar. The same works for Google; connected both ways, each event still shows once.
 
 </details>
 
@@ -319,6 +322,25 @@ cd Briefing
 </details>
 
 <details>
+<summary><b>Google sign-in</b></summary>
+<br>
+
+Direct sign-in needs an OAuth client of your own. Without them the app builds and runs, and Settings says sign-in is not set up in this build.
+
+[Google Cloud Console](https://console.cloud.google.com/): enable the Google Calendar API, set up the OAuth consent screen with the `calendar.readonly` scope, then create an OAuth client of type *Desktop app*.
+
+Put the ID and secret into `oauth.env` next to `build.sh` (it is git-ignored) or into the environment:
+
+```bash
+GOOGLE_CLIENT_ID=….apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=…
+```
+
+`build.sh` writes them into the app's Info.plist.
+
+</details>
+
+<details>
 <summary><b>Release a new version</b></summary>
 <br>
 
@@ -337,7 +359,7 @@ Commit the version bump and attach the three files to a GitHub release tagged `v
 <br>
 
 - Log: `~/Library/Logs/Briefing.log` — every open/skip decision is written there.
-- `state.json` — when it was last shown. `weather-cache.json` — the last weather, for offline mornings.
+- `state.json` — when it was last shown. `weather-cache.json` — the last weather, for offline mornings. `google-cache.json` — the day's events from a connected Google account.
 - Wake detection: wake, unlock, login and screensaver end trigger a check; a 30-second timer catches sleeps macOS forgot to announce.
 
 </details>

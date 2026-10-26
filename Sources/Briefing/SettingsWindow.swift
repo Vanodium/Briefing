@@ -573,8 +573,6 @@ private struct LayoutPreview: View {
 
 private struct CalendarsPage: View {
     @ObservedObject var model: SettingsModel
-    @ObservedObject private var google = GoogleAccount.shared
-    @ObservedObject private var googleData = GoogleCalendarService.shared
     @State private var eventCalendars: [EKCalendar] = []
     @State private var reminderLists: [EKCalendar] = []
     @State private var eventStatus = EKEventStore.authorizationStatus(for: .event)
@@ -618,18 +616,8 @@ private struct CalendarsPage: View {
                 }
             }
 
-            if GoogleConfig.enabled {
-                Section {
-                    googleSection
-                } header: {
-                    Text("Google Calendar")
-                } footer: {
-                    if let error = google.lastError {
-                        Text(error).foregroundStyle(.red)
-                    } else {
-                        Text("Read only. Briefing never changes your calendars. Events are kept on this Mac so the morning screen never waits for the network.")
-                    }
-                }
+            ForEach(CloudProvider.allCases) { provider in
+                CloudSection(model: model, provider: provider)
             }
         }
         .onAppear(perform: reload)
@@ -642,8 +630,9 @@ private struct CalendarsPage: View {
         reminderStatus = EKEventStore.authorizationStatus(for: .reminder)
         eventCalendars = AgendaService.shared.calendars(for: .event)
         reminderLists = AgendaService.shared.calendars(for: .reminder)
-        if google.isConnected && googleData.calendars.isEmpty {
-            Task { await GoogleCalendarService.shared.refreshCalendars() }
+        for provider in CloudProvider.allCases where CloudAccount.shared(provider).isConnected {
+            let data = CloudCalendarService.shared(provider)
+            if data.calendars.isEmpty { Task { await data.refreshCalendars() } }
         }
     }
 
@@ -703,38 +692,67 @@ private struct CalendarsPage: View {
             .padding(.leading, 16)
         }
     }
+}
+
+/// An online account (Google), signed in directly.
+private struct CloudSection: View {
+    @ObservedObject var model: SettingsModel
+    let provider: CloudProvider
+    @ObservedObject private var account: CloudAccount
+    @ObservedObject private var data: CloudCalendarService
+
+    init(model: SettingsModel, provider: CloudProvider) {
+        self.model = model
+        self.provider = provider
+        account = CloudAccount.shared(provider)
+        data = CloudCalendarService.shared(provider)
+    }
+
+    var body: some View {
+        Section {
+            content
+        } header: {
+            Text(provider.name)
+        } footer: {
+            if let error = account.lastError {
+                Text(error).foregroundStyle(.red)
+            } else if provider.isConfigured {
+                Text("Read only. Briefing never changes your calendars. Events are kept on this Mac so the morning screen never waits for the network.")
+            }
+        }
+    }
 
     @ViewBuilder
-    private var googleSection: some View {
-        if !GoogleConfig.isConfigured {
+    private var content: some View {
+        if !provider.isConfigured {
             VStack(alignment: .leading, spacing: 6) {
-                Text("Direct Google sign-in is not set up in this build of Briefing.")
-                Text("You can still see Google calendars: add your Google account in Internet Accounts (above) and they appear under Apple Calendar.")
+                Text("Direct \(provider.accountName) sign-in is not set up in this build of Briefing.")
+                Text("You can still see \(provider.name): add your \(provider.accountName) account in Internet Accounts (above) and its calendars appear under Apple Calendar.")
                     .font(.caption).foregroundStyle(.secondary)
             }
-        } else if google.isConnected {
+        } else if account.isConnected {
             HStack {
                 Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(model.s.googleAccount)
-                    if let at = googleData.lastFetch {
+                    Text(model.s[keyPath: provider.accountKey])
+                    if let at = data.lastFetch {
                         Text("Updated \(at.formatted(date: .abbreviated, time: .shortened))")
                             .font(.caption).foregroundStyle(.secondary)
                     }
                 }
                 Spacer()
-                Button("Disconnect") { google.disconnect() }
+                Button("Disconnect") { account.disconnect() }
             }
-            Toggle("Show Google events", isOn: model.binding(\.useGoogleCalendar))
-            if model.s.useGoogleCalendar {
-                if googleData.calendars.isEmpty {
+            Toggle("Show \(provider.name) events", isOn: model.binding(provider.useKey))
+            if model.s[keyPath: provider.useKey] {
+                if data.calendars.isEmpty {
                     HStack(spacing: 8) {
                         ProgressView().controlSize(.small)
                         Text("Loading calendars\u{2026}").foregroundStyle(.secondary)
                     }
                 } else {
-                    ForEach(googleData.calendars) { cal in
-                        Toggle(cal.name, isOn: model.calendar("g:" + cal.id))
+                    ForEach(data.calendars) { cal in
+                        Toggle(cal.name, isOn: model.calendar(provider.prefix + cal.id))
                             .toggleStyle(.checkbox)
                             .padding(.leading, 16)
                     }
@@ -742,16 +760,16 @@ private struct CalendarsPage: View {
             }
         } else {
             HStack {
-                Text("Read a Google account\u{2019}s calendars directly, without adding it to macOS.")
+                Text("Read a \(provider.accountName) account\u{2019}s calendars directly, without adding it to macOS.")
                 Spacer()
-                if google.busy {
+                if account.busy {
                     ProgressView().controlSize(.small)
-                    Button("Cancel") { google.cancelConnect() }
+                    Button("Cancel") { account.cancelConnect() }
                 } else {
-                    Button("Connect Google Account\u{2026}") { Task { await google.connect() } }
+                    Button("Connect \(provider.accountName) Account\u{2026}") { Task { await account.connect() } }
                 }
             }
-            if google.busy {
+            if account.busy {
                 Text("Finish signing in in your browser, then come back here.")
                     .font(.caption).foregroundStyle(.secondary)
             }

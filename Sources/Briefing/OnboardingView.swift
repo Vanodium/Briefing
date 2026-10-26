@@ -318,14 +318,14 @@ struct OnboardingView: View {
     // MARK: 003 Access
 
     private func accessList(_ g: DashGrid) -> some View {
-        let google = GoogleConfig.isConfigured
+        let cloud = CloudProvider.configured
         return VStack(alignment: .leading, spacing: 0) {
             Group {
                 accessRow("Calendar", "Today\u{2019}s events.", model.calendar, g, 0) { model.allowCalendar() }
                 accessRow("Reminders", "What is due.", model.reminders, g, 1) { model.allowReminders() }
-                if google {
-                    accessRow("Google Calendar", "Straight from your Google account.", model.google, g, 2,
-                              labels: ("Connect", "Connected")) { model.connectGoogle() }
+                ForEach(Array(cloud.enumerated()), id: \.element) { i, provider in
+                    accessRow(provider.name, "Straight from your \(provider.accountName) account.", model.cloud(provider), g, 2 + i,
+                              labels: ("Connect", "Connected")) { model.connect(provider) }
                 }
             }
             .opacity(model.showToday ? 1 : 0.3)
@@ -349,12 +349,12 @@ struct OnboardingView: View {
             }
             .padding(.vertical, 18 * g.s)
             .rule(bottom: true)
-            .rise(shown, delay(google ? 3 : 2), 16 * g.s, pace: Self.pace)
+            .rise(shown, delay(2 + cloud.count), 16 * g.s, pace: Self.pace)
 
             QuietButton(title: model.showToday ? "I don\u{2019}t use a calendar \u{2014} hide Today"
                                                : "Show Today after all", s: g.s) { model.toggleToday() }
                 .padding(.top, 18 * g.s)
-                .rise(shown, delay(google ? 4 : 3), 16 * g.s, pace: Self.pace)
+                .rise(shown, delay(3 + cloud.count), 16 * g.s, pace: Self.pace)
         }
     }
 
@@ -415,7 +415,7 @@ struct OnboardingView: View {
             ForEach(0..<model.principles.count, id: \.self) { i in
                 numberedField(i, label: "Principle \(i + 1)",
                               placeholder: Self.principleExamples[i % Self.principleExamples.count],
-                              text: $model.principles[i], g)
+                              text: $model.principles[i], limit: TextLimit.principle, g)
             }
         }
     }
@@ -438,14 +438,14 @@ struct OnboardingView: View {
     }
 
     private func numberedField(_ i: Int, label: String, placeholder: String, text: Binding<String>,
-                               _ g: DashGrid) -> some View {
+                               limit: Int? = nil, _ g: DashGrid) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 24 * g.s) {
             Text(String(format: "%02d", i + 1))
                 .font(Theme.font(12 * g.s)).tracking(1 * g.s)
                 .foregroundStyle(Theme.accent)
                 .frame(width: 32 * g.s, alignment: .leading)
                 .accessibilityHidden(true)
-            LineField(label: label, placeholder: placeholder, text: text, size: 36 * g.s, s: g.s)
+            LineField(label: label, placeholder: placeholder, text: text, size: 36 * g.s, s: g.s, limit: limit)
         }
         .rise(shown, delay(i), 16 * g.s, pace: Self.pace)
     }
@@ -612,6 +612,8 @@ private struct LineField: View {
     @Binding var text: String
     let size: CGFloat
     let s: CGFloat
+    /// The most characters the line may hold; longer typing or pasting is cut there.
+    var limit: Int? = nil
 
     @FocusState private var focused: Bool
 
@@ -624,6 +626,15 @@ private struct LineField: View {
             .padding(.vertical, 14 * s)
             .overlay(alignment: .bottom) {
                 Hair(color: focused ? Theme.ink.opacity(0.7) : Theme.row)
+            }
+            .overlay(alignment: .bottomTrailing) {
+                if let limit {
+                    LengthNote(count: text.count, limit: limit, s: s)
+                        .offset(y: 18 * s)
+                }
+            }
+            .onChange(of: text) { _, new in
+                if let limit, new.count > limit { text = String(new.prefix(limit)) }
             }
             .animation(Curves.fade(0.3), value: focused)
             .accessibilityLabel(label)
