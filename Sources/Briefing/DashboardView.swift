@@ -92,15 +92,19 @@ struct BlockSlot: Equatable {
     let span: Int
     var isFirst: Bool { startColumn == 0 }
 
-    /// Principles keep the wide column; the others share what is left.
-    ///   three blocks: 6 / 3 / 3 · Principles + one: 8 / 4 · two without Principles: 6 / 6 · one alone: 8 or 6.
+    /// Principles keep the wide column, Today the next widest; the month takes what is left.
+    ///   three blocks: 5 / 4 / 3 · Principles + Today: 7 / 5 · Principles + Month: 8 / 4 ·
+    ///   Today + Month: 7 / 5 · one alone: 8, 7 or 6.
     static func layout(_ blocks: [BlockID]) -> [BlockSlot] {
         let spans: [Int]
         switch blocks.count {
         case 0: spans = []
-        case 1: spans = [blocks[0].isWide ? 8 : 6]
-        case 2: spans = blocks.contains(where: \.isWide) ? blocks.map { $0.isWide ? 8 : 4 } : [6, 6]
-        default: spans = blocks.map { $0.isWide ? 6 : 3 }
+        case 1: spans = [blocks[0].isWide ? 8 : (blocks[0] == .today ? 7 : 6)]
+        case 2:
+            let wide: BlockID = blocks.contains(where: \.isWide) ? .principles : .today
+            let split = blocks.contains(.principles) && blocks.contains(.month) ? 8 : 7
+            spans = blocks.map { $0 == wide ? split : 12 - split }
+        default: spans = blocks.map { $0.isWide ? 5 : ($0 == .today ? 4 : 3) }
         }
         var column = 0
         var result: [BlockSlot] = []
@@ -124,6 +128,15 @@ struct DashboardView: View {
     private var blocks: [BlockID] { model.settings.visibleBlocks }
     private var slots: [BlockSlot] { BlockSlot.layout(blocks) }
 
+    /// How much lower the upper block stands before the day opens — near the optical centre.
+    private static let rest: CGFloat = 389
+    /// Once the day opens: the time's baseline, and the rule across the screen under it.
+    private static let clockBaseline: CGFloat = 236
+    private static let ruleTop: CGFloat = 281
+
+    /// The date stands on the second column's rule when that rule is at column 5, else at 6.
+    private var dateColumn: Int { slots.dropFirst().contains(where: { $0.startColumn == 5 }) ? 5 : 6 }
+
     private var cascade: Cascade {
         Cascade(order: blocks,
                 principles: model.principles.count,
@@ -139,7 +152,7 @@ struct DashboardView: View {
 
                 // The upper block starts lower, near the optical centre, then glides up into place.
                 header(g)
-                    .offset(y: isFull ? 0 : 260 * g.s)
+                    .offset(y: isFull ? 0 : Self.rest * g.s)
                     .animation(Curves.glide, value: isFull)
                     .receded(model.editing)
 
@@ -178,13 +191,14 @@ struct DashboardView: View {
                     }
                 }
                     .fixedSize()
-                    .offset(x: g.marginL - 4 * g.s, y: 365 * g.s - Theme.ascent(168 * g.s))
+                    .offset(x: g.marginL - 4 * g.s, y: Self.clockBaseline * g.s - Theme.ascent(168 * g.s))
                     .rise(shown, 0.55, 14 * g.s)
 
-                meta(first: Fmt.string(date, "d MMM yyyy"), second: dayOfYear(date),
-                     trailing: false, g)
+                // Once the big weekday has gone, the date line carries the name of the day.
+                meta(first: Fmt.string(date, "d MMM yyyy"), opened: Fmt.string(date, "EEEE, d MMM yyyy"),
+                     second: dayOfYear(date), trailing: false, g)
                     .frame(width: g.span(3), alignment: .leading)
-                    .offset(x: g.x(6), y: metaTop(g))
+                    .offset(x: g.x(dateColumn), y: metaTop(g))
                     .rise(shown, 0.9, 14 * g.s)
 
                 if model.settings.showWeather {
@@ -200,36 +214,64 @@ struct DashboardView: View {
         }
     }
 
-    /// The weekday, rising out of a mask as if from behind a line. Once the day opens,
-    /// the block glides up and the top edge of the screen takes a third off the capitals:
-    /// a crop deep enough to read as chosen, not as type that did not quite fit.
+    /// The weekday, rising out of a mask as if from behind a line. Once the day opens it is never
+    /// left half-cropped by the screen edge: it carries on upward and leaves through the top of the
+    /// same mask it came in by, while the block glides up and the date line takes the name of the day over.
     private func dayWord(_ date: Date, _ g: DashGrid) -> some View {
         let size = 300 * g.s
         let maskHeight = 262 * g.s
         let baseline = 231 * g.s
-        let top = Theme.nsFont(size).capHeight * 2 / 3 - baseline
+        // Where the baseline stands before the day opens: the arrangement this screen is built around.
+        let opening = Theme.nsFont(size).capHeight * 2 / 3 + 260 * g.s
+        let word = Fmt.string(date, "EEEE").uppercased(with: Theme.locale)
+        let tracking = -10 * g.s
+        // The longest names (WEDNESDAY) would run past the right edge at full size: they scale down to fit.
+        let fit = min(1, (g.w - g.marginL - g.marginR) / Self.width(of: word, size: size, tracking: tracking))
         return ZStack(alignment: .topLeading) {
             Color.clear
-            Text(Fmt.string(date, "EEEE").uppercased(with: Theme.locale))
-                .font(Theme.font(size))
-                .tracking(-10 * g.s)
+            Text(word)
+                .font(Theme.font(size * fit))
+                .tracking(tracking * fit)
                 .foregroundStyle(Theme.ink)
                 .fixedSize()
-                .offset(y: baseline - Theme.ascent(size))
+                .offset(y: baseline - Theme.ascent(size * fit))
                 .offset(y: shown ? 0 : maskHeight)
                 .animation(Curves.settle(1.9).delay(0.15), value: shown)
+                // Scoped, not `value:` animations: those would also take over the block's glide,
+                // and whatever they hold would trail behind the rest of the type.
+                .animation(Curves.leave(1.3)) { $0.offset(y: isFull ? -maskHeight : 0) }
                 .opacity(shown ? 1 : 0)
                 .animation(Curves.fade(1.2).delay(0.15), value: shown)
+                .animation(Curves.fade(0.9).delay(isFull ? 0.35 : 0)) { $0.opacity(isFull ? 0 : 1) }
         }
         .frame(width: g.w - g.marginL + 4 * g.s, height: maskHeight, alignment: .topLeading)
         .clipped()
-        .offset(x: g.marginL - 4 * g.s, y: top)
+        .offset(x: g.marginL - 4 * g.s, y: opening - Self.rest * g.s - baseline)
         .accessibilityHidden(true)
     }
 
-    private func meta(first: String, second: String, trailing: Bool, _ g: DashGrid) -> some View {
-        VStack(alignment: trailing ? .trailing : .leading, spacing: 6 * g.s) {
-            Text(first.uppercased(with: Theme.locale)).foregroundStyle(Theme.ink)
+    private static func width(of text: String, size: CGFloat, tracking: CGFloat) -> CGFloat {
+        let plain = (text as NSString).size(withAttributes: [.font: Theme.nsFont(size)]).width
+        return max(1, plain + tracking * CGFloat(text.count))
+    }
+
+    /// Two lines in small capitals. `opened`, when given, replaces the first line once the day opens.
+    private func meta(first: String, opened: String? = nil, second: String, trailing: Bool, _ g: DashGrid) -> some View {
+        let swap = opened != nil && isFull
+        return VStack(alignment: trailing ? .trailing : .leading, spacing: 6 * g.s) {
+            ZStack(alignment: trailing ? .trailing : .leading) {
+                // Only the opacity takes these delays (scoped animations): a `value:` animation would
+                // also hold back the line's glide, and the date would trail behind the time.
+                Text(first.uppercased(with: Theme.locale))
+                    .animation(Curves.fade(0.7).delay(swap ? 1.0 : 0)) { $0.opacity(swap ? 0 : 1) }
+                    .accessibilityHidden(swap)
+                if let opened {
+                    Text(opened.uppercased(with: Theme.locale))
+                        .animation(Curves.fade(0.9).delay(swap ? 1.3 : 0)) { $0.opacity(swap ? 1 : 0) }
+                        .accessibilityHidden(!swap)
+                }
+            }
+            .foregroundStyle(Theme.ink)
             Text(second.uppercased(with: Theme.locale)).foregroundStyle(Theme.soft)
         }
         .font(Theme.font(12 * g.s))
@@ -242,7 +284,7 @@ struct DashboardView: View {
     private func metaTop(_ g: DashGrid) -> CGFloat {
         let f = Theme.nsFont(12 * g.s)
         let lineHeight = f.ascender - f.descender + f.leading
-        return 366 * g.s - (lineHeight + 6 * g.s + f.ascender)
+        return (Self.clockBaseline + 1) * g.s - (lineHeight + 6 * g.s + f.ascender)
     }
 
     private func dayOfYear(_ date: Date) -> String {
@@ -272,7 +314,7 @@ struct DashboardView: View {
     // MARK: - Rules: one across the screen, two down to the bottom edge
 
     private func rules(_ g: DashGrid) -> some View {
-        let top = 410 * g.s
+        let top = Self.ruleTop * g.s
         return ZStack(alignment: .topLeading) {
             Color.clear
 
@@ -309,21 +351,19 @@ struct DashboardView: View {
     // MARK: - Lower half: 001 Principles, 002 Today, 003 Month
 
     private func columns(_ g: DashGrid) -> some View {
-        let top = 440 * g.s
+        let top = (Self.ruleTop + 30) * g.s
         let height = max(0, g.h - top - g.columnsBottom)
         let c = cascade
         return ZStack(alignment: .topLeading) {
             Color.clear
 
             ForEach(slots, id: \.block) { slot in
-                block(slot, g, c)
-                    .frame(width: g.span(slot.span) - (slot.isFirst ? 40 : 24) * g.s,
-                           height: height, alignment: .topLeading)
-                    // A long list stops at the bottom of its column instead of running into the hints;
-                    // the sides and top stay open for the blur of rising type.
-                    .mask(alignment: .top) {
-                        Rectangle().padding(.horizontal, -60 * g.s).padding(.top, -60 * g.s)
-                    }
+                let width = g.span(slot.span) - (slot.isFirst ? 40 : 24) * g.s
+                // What the list under the index label has to fit in, clear of the fading bottom edge.
+                let room = CGSize(width: width, height: max(0, height - (44 + 12) * g.s))
+                block(slot, g, c, room: room)
+                    .frame(width: width, height: height, alignment: .topLeading)
+                    .mask(alignment: .top) { columnMask(g) }
                     .offset(x: slot.isFirst ? g.marginL : g.x(slot.startColumn) + 24 * g.s, y: top)
                     .transition(.opacity)
             }
@@ -333,13 +373,47 @@ struct DashboardView: View {
         .animation(Curves.settle(0.9), value: slots)
     }
 
-    @ViewBuilder
-    private func block(_ slot: BlockSlot, _ g: DashGrid, _ c: Cascade) -> some View {
-        switch slot.block {
-        case .principles: principlesColumn(g, c, number: slot.number)
-        case .today: todayColumn(g, c, number: slot.number).receded(model.editing)
-        case .month: monthColumn(g, c, number: slot.number)
+    /// A long list stops at the bottom of its column instead of running into the hints, and ends in a short
+    /// fade rather than a line cut in half. The sides and top stay open for the blur of rising type.
+    private func columnMask(_ g: DashGrid) -> some View {
+        VStack(spacing: 0) {
+            Rectangle()
+            LinearGradient(colors: [.black, .clear], startPoint: .top, endPoint: .bottom)
+                .frame(height: 36 * g.s)
         }
+        .padding(.horizontal, -60 * g.s)
+        .padding(.top, -60 * g.s)
+    }
+
+    @ViewBuilder
+    private func block(_ slot: BlockSlot, _ g: DashGrid, _ c: Cascade, room: CGSize) -> some View {
+        switch slot.block {
+        case .principles: principlesColumn(g, c, number: slot.number, room: room)
+        case .today: todayColumn(g, c, number: slot.number).receded(model.editing)
+        case .month: monthColumn(g, c, number: slot.number, room: room)
+        }
+    }
+
+    /// The largest of `sizes` at which every line, wrapped to the column's width, fits its height.
+    /// Past the smallest, the column's faded bottom edge takes what does not fit.
+    private static func fittingSize(_ texts: [String], sizes: [CGFloat], weight: Theme.Weight, tracking: CGFloat,
+                                    spacing: CGFloat, in room: CGSize, s: CGFloat) -> CGFloat {
+        for size in sizes where textHeight(texts, size: size * s, weight: weight, tracking: tracking,
+                                           spacing: spacing, width: room.width) <= room.height {
+            return size * s
+        }
+        return (sizes.last ?? Theme.Size.text) * s
+    }
+
+    private static func textHeight(_ texts: [String], size: CGFloat, weight: Theme.Weight, tracking: CGFloat,
+                                   spacing: CGFloat, width: CGFloat) -> CGFloat {
+        let attributes: [NSAttributedString.Key: Any] = [.font: Theme.nsFont(size, weight), .kern: tracking]
+        let bound = CGSize(width: max(1, width - 2), height: .greatestFiniteMagnitude)
+        let lines = texts.reduce(CGFloat(0)) { total, text in
+            total + ceil((text as NSString).boundingRect(with: bound, options: [.usesLineFragmentOrigin, .usesFontLeading],
+                                                          attributes: attributes).height)
+        }
+        return lines + spacing * CGFloat(max(texts.count - 1, 0))
     }
 
     private static func index(_ n: Int) -> String { String(format: "%03d", n) }
@@ -360,9 +434,11 @@ struct DashboardView: View {
     }
 
     // 001
-    private func principlesColumn(_ g: DashGrid, _ c: Cascade, number: Int) -> some View {
-        let count = model.principles.count
-        let size: CGFloat = (count <= 5 ? Theme.Size.heading : Theme.Size.subheading) * g.s
+    private func principlesColumn(_ g: DashGrid, _ c: Cascade, number: Int, room: CGSize) -> some View {
+        // 36 pt for a short list, 28 for a longer one, stepping down further when long lines would overflow.
+        let sizes: [CGFloat] = model.principles.count <= 5 ? [36, 32, 28, 24, 20] : [28, 24, 20]
+        let size = Self.fittingSize(model.principles.map(\.text), sizes: sizes, weight: .medium,
+                                    tracking: -0.5 * g.s, spacing: 6 * g.s, in: room, s: g.s)
 
         return VStack(alignment: .leading, spacing: 0) {
             indexLabel(Self.index(number), "Principles", line: 56, g)
@@ -373,7 +449,7 @@ struct DashboardView: View {
                     VStack(alignment: .leading, spacing: 0) {
                         EditableList(items: $model.principles, size: Theme.Size.subheading * g.s, weight: .medium,
                                      placeholder: "New principle", addTitle: "Add principle",
-                                     s: g.s, onChange: { model.persist() })
+                                     s: g.s, limit: TextLimit.principle, onChange: { model.persist() })
                     }
                     .padding(.top, 30 * g.s)
                     .padding(.bottom, 24 * g.s)
@@ -436,9 +512,9 @@ struct DashboardView: View {
                     .rise(isFull, c.row(0), 20 * g.s)
                 } else if shownItems.isEmpty {
                     Text("Nothing scheduled.")
-                        .font(Theme.font(16 * g.s, .regular))
+                        .font(Theme.font(Theme.Size.body * g.s, .regular))
                         .foregroundStyle(Theme.soft)
-                        .padding(.vertical, 9 * g.s)
+                        .padding(.vertical, 11 * g.s)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .overlay(alignment: .top) { Hair() }
                         .overlay(alignment: .bottom) { Hair() }
@@ -465,11 +541,16 @@ struct DashboardView: View {
     }
 
     // 003
-    private func monthColumn(_ g: DashGrid, _ c: Cascade, number: Int) -> some View {
+    private func monthColumn(_ g: DashGrid, _ c: Cascade, number: Int, room: CGSize) -> some View {
         let cur = model.currentMonthKey
         let next = model.nextMonthKey
         let day = Calendar.current.component(.day, from: model.now)
         let days = Calendar.current.range(of: .day, in: .month, for: model.now)?.count ?? 30
+        // Long challenges step down from 20 pt rather than run off the bottom; the closing line keeps its place.
+        let closing: CGFloat = DayKey.isLastDayOfMonth(model.now) ? 40 * g.s : 0
+        let size = Self.fittingSize(model.currentChallenges.map(\.text), sizes: [20, 18, 16], weight: .regular,
+                                    tracking: 0, spacing: 14 * g.s,
+                                    in: CGSize(width: room.width, height: room.height - closing), s: g.s)
 
         return VStack(alignment: .leading, spacing: 0) {
             if model.editing {
@@ -502,7 +583,7 @@ struct DashboardView: View {
                     } else {
                         ForEach(Array(model.currentChallenges.enumerated()), id: \.element.id) { i, item in
                             Text(item.text)
-                                .font(Theme.font(20 * g.s, .regular))
+                                .font(Theme.font(size, .regular))
                                 .foregroundStyle(Theme.ink)
                                 .fixedSize(horizontal: false, vertical: true)
                                 .rise(isFull, c.month(i), 20 * g.s)
@@ -579,6 +660,30 @@ struct DashboardView: View {
 }
 
 // MARK: - Edit mode
+
+/// How long a line may be typed. A principle is read in one breath: about two lines in the wide column at 36 pt,
+/// so five of them still fit without the type stepping down.
+enum TextLimit {
+    static let principle = 60
+}
+
+/// "52 / 60" under a field, once the text comes within ten characters of its limit; nothing before that.
+struct LengthNote: View {
+    let count: Int
+    let limit: Int
+    let s: CGFloat
+
+    var body: some View {
+        let near = count >= limit - 10
+        Text("\(count) / \(limit)")
+            .font(Theme.font(11 * s, .regular))
+            .monospacedDigit()
+            .foregroundStyle(count >= limit ? Theme.soft : Theme.dim)
+            .opacity(near ? 1 : 0)
+            .animation(Curves.fade(0.3), value: near)
+            .accessibilityHidden(!near)
+    }
+}
 
 private extension View {
     /// While editing, what cannot be edited steps back, so the eye goes to what can.
@@ -658,23 +763,23 @@ private struct AgendaRow: View {
     }
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 18 * s) {
+        HStack(alignment: .firstTextBaseline, spacing: 20 * s) {
             Text(timeLabel)
                 .monospacedDigit()
-                .frame(width: (Fmt.uses24Hour ? 58 : 76) * s, alignment: .leading)
+                .frame(width: (Fmt.uses24Hour ? 72 : 100) * s, alignment: .leading)
             VStack(alignment: .leading, spacing: 3 * s) {
                 Text(item.title)
                     .lineLimit(2)
                 if let since = item.overdueSince {
                     Text("from " + Fmt.string(since, "MMM d"))
-                        .font(Theme.font(12 * s, .regular))
+                        .font(Theme.font(13 * s, .regular))
                         .foregroundStyle(Theme.dim)
                 }
             }
         }
-        .font(Theme.font(16 * s, isNext ? .bold : .regular))
+        .font(Theme.font(Theme.Size.body * s, isNext ? .bold : .regular))
         .foregroundStyle(color)
-        .padding(.vertical, 9 * s)
+        .padding(.vertical, 11 * s)
         .frame(maxWidth: .infinity, alignment: .leading)
         .overlay(alignment: .top) { Hair() }
         .overlay(alignment: .bottom) {
@@ -692,6 +797,8 @@ private struct EditableList: View {
     let placeholder: String
     let addTitle: String
     let s: CGFloat
+    /// The most characters a line may hold; longer typing or pasting is cut there.
+    var limit: Int? = nil
     let onChange: () -> Void
 
     @FocusState private var focused: UUID?
@@ -713,6 +820,15 @@ private struct EditableList: View {
                         .overlay(alignment: .bottom) {
                             Hair(color: focused == item.id ? Theme.ink.opacity(0.7) : Theme.row)
                                 .animation(Curves.fade(0.3), value: focused)
+                        }
+                        .overlay(alignment: .bottomTrailing) {
+                            if let limit {
+                                LengthNote(count: item.text.count, limit: limit, s: s)
+                                    .offset(y: 16 * s)
+                            }
+                        }
+                        .onChange(of: item.text) { _, new in
+                            if let limit, new.count > limit { item.text = String(new.prefix(limit)) }
                         }
                     // Quiet until you reach for the row: only the text, until hover or focus.
                     let active = hovered == item.id || focused == item.id
